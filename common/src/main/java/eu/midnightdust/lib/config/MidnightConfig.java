@@ -326,6 +326,7 @@ public abstract class MidnightConfig {
             //noinspection DataFlowIssue
             this.list = this.addWidget(new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
             if (this.minecraft != null && this.minecraft.level != null) {
+                this.list.setRenderTopAndBottom(false);
                 this.list.setRenderBackground(false);
             }
 
