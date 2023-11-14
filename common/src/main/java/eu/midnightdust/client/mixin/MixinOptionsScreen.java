@@ -23,6 +23,7 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void midnightlib$init(CallbackInfo ci) {
+        //noinspection ConstantValue
         if (MidnightLibConfig.config_screen_list.equals(MidnightLibConfig.ConfigButton.TRUE) || (MidnightLibConfig.config_screen_list.equals(MidnightLibConfig.ConfigButton.MODMENU) && !PlatformFunctions.isModLoaded("modmenu"))) {
             this.addRenderableWidget(TexturedOverlayButtonWidget.texturedBuilder(Component.translatable("midnightlib.overview.title"),
                             (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new MidnightConfigOverviewScreen(this)))

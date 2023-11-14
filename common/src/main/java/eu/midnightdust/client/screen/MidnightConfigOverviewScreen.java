@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class MidnightConfigOverviewScreen extends Screen {
@@ -33,10 +32,12 @@ public class MidnightConfigOverviewScreen extends Screen {
 
     @Override
     protected void init() {
+        //noinspection DataFlowIssue
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> this.minecraft.setScreen(parent))
                                 .bounds(this.width / 2 - 100, this.height - 28, 200, 20)
                                 .build());
 
+        //noinspection DataFlowIssue
         this.list = this.addWidget(new MidnightOverviewListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
         if (this.minecraft != null && this.minecraft.level != null) {
             this.list.setRenderBackground(false);

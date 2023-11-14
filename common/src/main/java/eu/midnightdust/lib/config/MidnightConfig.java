@@ -54,6 +54,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /** MidnightConfig v2.5.0 by TeamMidnightDust & Motschen
  *  Single class config library - feel free to copy!
@@ -124,7 +125,7 @@ public abstract class MidnightConfig {
         info.id = modid;
 
         if (e != null) {
-            if (!e.name().equals("")) info.name = Component.translatable(e.name());
+            if (!e.name().isEmpty()) info.name = Component.translatable(e.name());
             if (type == int.class) textField(info, Integer::parseInt, INTEGER_ONLY, (int) e.min(), (int) e.max(), true);
             else if (type == float.class) textField(info, Float::parseFloat, DECIMAL_ONLY, (float) e.min(), (float) e.max(), false);
             else if (type == double.class) textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
@@ -147,11 +148,12 @@ public abstract class MidnightConfig {
         }
         entries.add(info);
     }
-    public static Tooltip getTooltip(EntryInfo info) {
+
+    private static Tooltip getTooltip(EntryInfo info) {
         return Tooltip.create(info.error != null ? info.error : I18n.exists(info.id + ".midnightconfig."+info.field.getName()+".tooltip") ? Component.translatable(info.id + ".midnightconfig."+info.field.getName()+".tooltip") : Component.empty());
     }
 
-    private static void textField(EntryInfo info, Function<String,Number> f, Pattern pattern, double min, double max, boolean cast) {
+    private static void textField(EntryInfo info, Function<String,Number> f, @Nullable Pattern pattern, double min, double max, boolean cast) {
         boolean isNumber = pattern != null;
         info.widget = (BiFunction<EditBox, Button, Predicate<String>>) (t, b) -> s -> {
             s = s.trim();
@@ -201,12 +203,15 @@ public abstract class MidnightConfig {
     public void writeChanges(String modid) {
         path = PlatformFunctions.getConfigDirectory().resolve(modid + ".json");
         try {
-            if (!Files.exists(path)) Files.createFile(path);
+            if (!Files.exists(path)) {
+                Files.createFile(path);
+            }
             Files.write(path, gson.toJson(getClass(modid)).getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @Environment(EnvType.CLIENT)
     public static Screen getScreen(Screen parent, String modid) {
         return new MidnightConfigScreen(parent, modid);
@@ -318,6 +323,7 @@ public abstract class MidnightConfig {
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }).bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
 
+            //noinspection DataFlowIssue
             this.list = this.addWidget(new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
             if (this.minecraft != null && this.minecraft.level != null) {
                 this.list.setRenderBackground(false);
@@ -413,13 +419,11 @@ public abstract class MidnightConfig {
     }
     @Environment(EnvType.CLIENT)
     public static class MidnightConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
-        Font textRenderer;
-
         public MidnightConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
             super(minecraftClient, i, j, k, l, m);
             this.centerListVertically = false;
-            textRenderer = minecraftClient.font;
         }
+
         @Override
         public int getScrollbarPosition() { return this.width -7; }
 
@@ -432,7 +436,8 @@ public abstract class MidnightConfig {
         @Override
         public int getRowWidth() { return 10000; }
     }
-    public static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry> {
+    @Environment(EnvType.CLIENT)
+    protected static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry> {
         private static final Font textRenderer = Minecraft.getInstance().font;
         public final List<AbstractWidget> buttons;
         private final Component text;
@@ -447,6 +452,8 @@ public abstract class MidnightConfig {
             this.info = info;
             children.addAll(buttons);
         }
+
+        @Override
         public void render(GuiGraphics context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             buttons.forEach(b -> { b.setY(y); b.render(context, mouseX, mouseY, tickDelta); });
             if (text != null && (!text.getString().contains("spacer") || !buttons.isEmpty())) {
@@ -460,13 +467,17 @@ public abstract class MidnightConfig {
                 }
             }
         }
+
         @Override
         public List<? extends GuiEventListener> children() {return children;}
         @Override
         public List<? extends NarratableEntry> narratables() {return children;}
     }
-    public static class MidnightSliderWidget extends AbstractSliderButton {
-        private final EntryInfo info; private final Entry e;
+    @Environment(EnvType.CLIENT)
+    protected static class MidnightSliderWidget extends AbstractSliderButton {
+        private final EntryInfo info;
+        private final Entry e;
+
         public MidnightSliderWidget(int x, int y, int width, int height, Component text, double value, EntryInfo info) {
             super(x, y, width, height, text, value);
             this.e = info.field.getAnnotation(Entry.class);
@@ -486,6 +497,7 @@ public abstract class MidnightConfig {
             info.tempValue = String.valueOf(info.value);
         }
     }
+
     @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.FIELD) public @interface Entry {
         int width() default 100;
         double min() default Double.MIN_NORMAL;
@@ -504,8 +516,10 @@ public abstract class MidnightConfig {
         String category() default "default";
     }
 
-    public static class HiddenAnnotationExclusionStrategy implements ExclusionStrategy {
+    protected static class HiddenAnnotationExclusionStrategy implements ExclusionStrategy {
+        @Override
         public boolean shouldSkipClass(Class<?> clazz) { return false; }
+        @Override
         public boolean shouldSkipField(FieldAttributes fieldAttributes) {
             return fieldAttributes.getAnnotation(Entry.class) == null;
         }
