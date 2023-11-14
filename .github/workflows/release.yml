@@ -66,5 +66,8 @@ jobs:
           draft: false
           prerelease: false
           artifacts: "common/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-common-${{ steps.composite_version.outputs.composite_version }}.jar,
+            common/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-common-${{ steps.composite_version.outputs.composite_version }}-sources.jar,
             fabric/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-fabric-${{ steps.composite_version.outputs.composite_version }}.jar,
-            forge/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-forge-${{ steps.composite_version.outputs.composite_version }}.jar"
+            fabric/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-fabric-${{ steps.composite_version.outputs.composite_version }}-sources.jar,
+            forge/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-forge-${{ steps.composite_version.outputs.composite_version }}.jar,
+            forge/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-forge-${{ steps.composite_version.outputs.composite_version }}-sources.jar,"
