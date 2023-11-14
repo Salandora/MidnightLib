@@ -68,7 +68,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = "${project.base.archivesName}-${project.name}"
+            artifactId = project.base.archivesName
             from components.java
         }
     }

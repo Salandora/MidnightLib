@@ -69,7 +69,7 @@ components.java {
 publishing {
     publications {
         mavenForge(MavenPublication) {
-            artifactId = "${project.base.archivesName}-${project.name}"
+            artifactId = project.base.archivesName
             from components.java
         }
     }
