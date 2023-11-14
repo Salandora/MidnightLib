@@ -4,7 +4,6 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.midnightdust.client.gui.components.TexturedOverlayButtonWidget;
 import eu.midnightdust.lib.util.PlatformFunctions;
 
 import net.fabricmc.api.EnvType;
@@ -18,6 +17,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
@@ -336,17 +336,18 @@ public abstract class MidnightConfig {
             for (EntryInfo info : entries) {
                 if (info.id.equals(modid) && (info.tab == null || info.tab == tabManager.getCurrentTab())) {
                     Component name = Objects.requireNonNullElseGet(info.name, () -> Component.translatable(translationPrefix + info.field.getName()));
-                    TexturedOverlayButtonWidget resetButton = TexturedOverlayButtonWidget.texturedBuilder(Component.translatable("controls.reset"),
+                    SpriteIconButton resetButton = SpriteIconButton.builder(Component.translatable("controls.reset"),
                                     (button -> {
                                         info.value = info.defaultValue;
                                         info.tempValue = info.defaultValue.toString();
                                         info.index = 0;
                                         list.clear();
                                         fillList();
-                                    }))
-                            .dimensions(width - 205, 0, 40, 20)
-                            .texture(new ResourceLocation("midnightlib","textures/gui/sprites/icon/reset.png"), 12, 12)
+                                    }), true)
+                            .size(40, 20)
+                            .sprite(new ResourceLocation("midnightlib","icon/reset"), 12, 12)
                             .build();
+                    resetButton.setPosition(width - 205, 0);
 
                     if (info.widget instanceof Map.Entry) {
                         Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
@@ -407,10 +408,8 @@ public abstract class MidnightConfig {
         }
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            super.renderBackground(context);
-            this.list.render(context, mouseX, mouseY, delta);
-
             super.render(context,mouseX,mouseY,delta);
+            this.list.render(context, mouseX, mouseY, delta);
 
             if (tabs.size() < 2) {
                 context.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);

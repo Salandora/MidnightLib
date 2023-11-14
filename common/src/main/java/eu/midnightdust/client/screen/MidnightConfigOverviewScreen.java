@@ -55,10 +55,8 @@ public class MidnightConfigOverviewScreen extends Screen {
     }
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderBackground(context);
-        this.list.render(context, mouseX, mouseY, delta);
-
         super.render(context, mouseX, mouseY, delta);
+        this.list.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
     }
