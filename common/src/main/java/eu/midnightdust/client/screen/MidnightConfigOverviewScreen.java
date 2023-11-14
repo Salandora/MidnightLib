@@ -33,39 +33,48 @@ public class MidnightConfigOverviewScreen extends Screen {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> Objects.requireNonNull(minecraft).setScreen(parent)).bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> this.minecraft.setScreen(parent))
+                                .bounds(this.width / 2 - 100, this.height - 28, 200, 20)
+                                .build());
 
-        this.list = new MidnightOverviewListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
-        if (this.minecraft != null && this.minecraft.level != null) this.list.setRenderBackground(false);
-        this.addWidget(this.list);
+        this.list = this.addWidget(new MidnightOverviewListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
+        if (this.minecraft != null && this.minecraft.level != null) {
+            this.list.setRenderBackground(false);
+        }
+
         List<String> sortedMods = new ArrayList<>(MidnightConfig.configClass.keySet());
         Collections.sort(sortedMods);
         sortedMods.forEach((modid) -> {
             if (!MidnightLibClient.hiddenMods.contains(modid)) {
-                list.addButton(Button.builder(Component.translatable(modid +".midnightconfig.title"), (button) ->
-                        Objects.requireNonNull(minecraft).setScreen(MidnightConfig.getScreen(this,modid))).bounds(this.width / 2 - 125, this.height - 28, 250, 20).build());
+                list.addButton(Button.builder(Component.translatable(modid + ".midnightconfig.title"), (button) ->
+                        minecraft.setScreen(MidnightConfig.getScreen(this, modid))).bounds(this.width / 2 - 125, this.height - 28, 250, 20).build());
             }
         });
         super.init();
     }
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+        super.renderBackground(context);
         this.list.render(context, mouseX, mouseY, delta);
+
+        super.render(context, mouseX, mouseY, delta);
+
         context.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
     }
     @Environment(EnvType.CLIENT)
     public static class MidnightOverviewListWidget extends ContainerObjectSelectionList<OverviewButtonEntry> {
-        public MidnightOverviewListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
-            super(minecraftClient, i, j, k, l, m);
+        public MidnightOverviewListWidget(Minecraft minecraft, int width, int height, int yMin, int yMax, int itemHeight) {
+            super(minecraft, width, height, yMin, yMax, itemHeight);
             this.centerListVertically = false;
         }
+
         @Override
         public int getScrollbarPosition() {return this.width-7;}
 
         public void addButton(AbstractWidget button) {
             this.addEntry(OverviewButtonEntry.create(button));
         }
+
         @Override
         public int getRowWidth() { return 400; }
     }
@@ -75,12 +84,18 @@ public class MidnightConfigOverviewScreen extends Screen {
         private OverviewButtonEntry(AbstractWidget button) {
             this.button = button;
         }
+
         public static OverviewButtonEntry create(AbstractWidget button) {return new OverviewButtonEntry(button);}
+
+        @Override
         public void render(GuiGraphics context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             button.setY(y);
             button.render(context, mouseX, mouseY, tickDelta);
         }
+
+        @Override
         public List<? extends GuiEventListener> children() {return List.of(button);}
+        @Override
         public List<? extends NarratableEntry> narratables() {return List.of(button);}
     }
 }

@@ -28,8 +28,6 @@ public class MixinOptionsScreen extends Screen {
                             (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new MidnightConfigOverviewScreen(this)))
                     .texture(new ResourceLocation("midnightlib","textures/gui/sprites/icon/midnightlib.png"), 16, 16)
                     .dimensions(this.width / 2 + 158, this.height / 6 - 12, 20, 20)
-                    .vOffset(20)
-                    .overlayOffset(2, 2)
                     .build());
         }
     }

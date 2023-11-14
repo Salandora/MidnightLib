@@ -299,7 +299,9 @@ public abstract class MidnightConfig {
             super.init();
             tabNavigation.setWidth(this.width);
             tabNavigation.arrangeElements();
-            if (tabs.size() > 1) this.addRenderableWidget(tabNavigation);
+            if (tabs.size() > 1) {
+                this.addRenderableWidget(tabNavigation);
+            }
 
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
                 loadValues();
@@ -316,9 +318,10 @@ public abstract class MidnightConfig {
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }).bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
 
-            this.list = new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
-            if (this.minecraft != null && this.minecraft.level != null) this.list.setRenderBackground(false);
-            this.addWidget(this.list);
+            this.list = this.addWidget(new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
+            if (this.minecraft != null && this.minecraft.level != null) {
+                this.list.setRenderBackground(false);
+            }
 
             fillList();
             reload = true;
@@ -337,10 +340,7 @@ public abstract class MidnightConfig {
                                     }))
                             .dimensions(width - 205, 0, 40, 20)
                             .texture(new ResourceLocation("midnightlib","textures/gui/sprites/icon/reset.png"), 12, 12)
-                            .vOffset(20)
-                            .overlayOffset(14, 4)
                             .build();
-                    resetButton.setPosition(width - 205, 0);
 
                     if (info.widget instanceof Map.Entry) {
                         Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
@@ -401,10 +401,14 @@ public abstract class MidnightConfig {
         }
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            super.render(context,mouseX,mouseY,delta);
+            super.renderBackground(context);
             this.list.render(context, mouseX, mouseY, delta);
 
-            if (tabs.size() < 2) context.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
+            super.render(context,mouseX,mouseY,delta);
+
+            if (tabs.size() < 2) {
+                context.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
+            }
         }
     }
     @Environment(EnvType.CLIENT)
@@ -419,7 +423,7 @@ public abstract class MidnightConfig {
         @Override
         public int getScrollbarPosition() { return this.width -7; }
 
-        public void addButton(List<AbstractWidget> buttons, Component text, EntryInfo info) {
+        protected void addButton(List<AbstractWidget> buttons, Component text, EntryInfo info) {
             this.addEntry(new ButtonEntry(buttons, text, info));
         }
         public void clear() {
@@ -432,7 +436,7 @@ public abstract class MidnightConfig {
         private static final Font textRenderer = Minecraft.getInstance().font;
         public final List<AbstractWidget> buttons;
         private final Component text;
-        public final EntryInfo info;
+        private final EntryInfo info;
         private final List<AbstractWidget> children = new ArrayList<>();
         public static final Map<AbstractWidget, Component> buttonsWithText = new HashMap<>();
 
@@ -456,7 +460,9 @@ public abstract class MidnightConfig {
                 }
             }
         }
+        @Override
         public List<? extends GuiEventListener> children() {return children;}
+        @Override
         public List<? extends NarratableEntry> narratables() {return children;}
     }
     public static class MidnightSliderWidget extends AbstractSliderButton {

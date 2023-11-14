@@ -1,0 +1,70 @@
+name: Release
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        java: [ 17 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-java-${{ matrix.java }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-java-${{ matrix.java }}-gradle-
+
+      - name: Setup JDK${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Get Mod Name
+        id: archives_base_name
+        run: grep "archives_base_name" gradle.properties | sed "s/\s//g" >> $GITHUB_OUTPUT
+
+      - name: Get Mod Version
+        id: mod_version
+        run: grep "mod_version" gradle.properties | sed "s/\s//g" >> $GITHUB_OUTPUT
+
+      - name: Get Minecraft Version
+        id: minecraft_version
+        run: grep "minecraft_version" gradle.properties | sed "s/\s//g" >> $GITHUB_OUTPUT
+
+      - name: Get Composite Version
+        id: composite_version
+        run: echo "composite_version=${{ steps.mod_version.outputs.mod_version }}-${{ steps.minecraft_version.outputs.minecraft_version }}" >> $GITHUB_OUTPUT
+
+      - uses: gradle/wrapper-validation-action@v1
+
+      - name: Publish
+        if: ${{ !env.ACT }}
+        env:
+          RELEASE: true
+        run: ./gradlew build publish
+
+      - name: Create Release
+        if: ${{ !env.ACT }}
+        id: create_release
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          tag: ${{ steps.composite_version.outputs.composite_version }}
+          name: ${{ steps.archives_base_name.outputs.archives_base_name }} ${{ steps.composite_version.outputs.composite_version }}
+          bodyFile: CHANGELOG.md
+          draft: false
+          prerelease: false
+          artifacts: "common/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-${{ steps.composite_version.outputs.composite_version }}.jar,
+            fabric/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-fabric-${{ steps.composite_version.outputs.composite_version }}.jar,
+            forge/build/libs/${{ steps.archives_base_name.outputs.archives_base_name }}-forge-${{ steps.composite_version.outputs.composite_version }}.jar"
