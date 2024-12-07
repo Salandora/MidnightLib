@@ -4,6 +4,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.blaze3d.systems.RenderSystem;
 import eu.midnightdust.client.gui.components.TexturedOverlayButtonWidget;
 import eu.midnightdust.lib.util.PlatformFunctions;
 
@@ -247,7 +248,6 @@ public abstract class MidnightConfig {
         public final Screen parent;
         public final String modid;
         public MidnightConfigListWidget list;
-        public boolean reload = false;
         public TabManager tabManager = new TabManager(a -> {}, a -> {});
         public Map<String, Tab> tabs = new HashMap<>();
         public Tab prevTab;
@@ -324,14 +324,11 @@ public abstract class MidnightConfig {
             }).bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
 
             //noinspection DataFlowIssue
-            this.list = this.addWidget(new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25));
-            if (this.minecraft != null && this.minecraft.level != null) {
-                this.list.setRenderTopAndBottom(false);
-                this.list.setRenderBackground(false);
-            }
-
+            this.list = this.addWidget(new MidnightConfigListWidget(this.minecraft, this.width, this.height - 57, 24, 25));
             fillList();
-            reload = true;
+            if (tabs.size() > 1) {
+                list.renderHeaderSeparator = false;
+            }
         }
         public void fillList() {
             for (EntryInfo info : entries) {
@@ -345,8 +342,8 @@ public abstract class MidnightConfig {
                                         list.clear();
                                         fillList();
                                     }))
-                            .dimensions(width - 205, 0, 40, 20)
-                            .texture(new ResourceLocation("midnightlib","textures/gui/sprites/icon/reset.png"), 12, 12)
+                            .texture(ResourceLocation.fromNamespaceAndPath("midnightlib","textures/gui/sprites/icon/reset.png"), 12, 12)
+                            .dimensions(width - 205 + 150 + 25, 0, 20, 20)
                             .build();
 
                     if (info.widget instanceof Map.Entry) {
@@ -408,7 +405,7 @@ public abstract class MidnightConfig {
         }
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            super.renderBackground(context);
+            super.renderBackground(context, mouseX, mouseY, delta);
             this.list.render(context, mouseX, mouseY, delta);
 
             super.render(context,mouseX,mouseY,delta);
@@ -420,15 +417,28 @@ public abstract class MidnightConfig {
     }
     @Environment(EnvType.CLIENT)
     public static class MidnightConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
-        public MidnightConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
-            super(minecraftClient, i, j, k, l, m);
+        public boolean renderHeaderSeparator = true;
+        public MidnightConfigListWidget(Minecraft client, int width, int height, int y, int itemHeight) {
+            super(client, width, height, y, itemHeight);
             this.centerListVertically = false;
         }
 
         @Override
         public int getScrollbarPosition() { return this.width -7; }
 
-        protected void addButton(List<AbstractWidget> buttons, Component text, EntryInfo info) {
+        @Override
+        protected void renderListSeparators(GuiGraphics guiGraphics) {
+            if (renderHeaderSeparator) {
+                super.renderListSeparators(guiGraphics);
+            }
+            else {
+                RenderSystem.enableBlend();
+                guiGraphics.blit(this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+                RenderSystem.disableBlend();
+            }
+        }
+
+        public void addButton(List<AbstractWidget> buttons, Component text, EntryInfo info) {
             this.addEntry(new ButtonEntry(buttons, text, info));
         }
         public void clear() {

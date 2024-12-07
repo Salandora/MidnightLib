@@ -32,7 +32,7 @@ public class TexturedOverlayButtonWidget extends Button {
 	@Override
 	public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.renderWidget(context, mouseX, mouseY, delta);
-		this.renderTexture(context, this.texture, this.getXOffset(), this.getYOffset(), 0, 0, 0, this.textureWidth, this.textureHeight, this.textureWidth, this.textureHeight);
+		context.blitSprite(this.texture, this.getXOffset(), this.getYOffset(), 0, 0, 0, this.textureWidth, this.textureHeight, this.textureWidth, this.textureHeight);
 	}
 
 	@Override
