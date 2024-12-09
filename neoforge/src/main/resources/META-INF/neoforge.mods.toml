@@ -20,7 +20,7 @@ config = "midnightlib.mixins.json"
 [[dependencies.midnightlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.0,)"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 

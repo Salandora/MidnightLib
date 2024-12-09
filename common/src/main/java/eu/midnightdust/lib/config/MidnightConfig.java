@@ -352,7 +352,7 @@ public abstract class MidnightConfig {
                             widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
                         this.list.addButton(List.of(Button.builder(widget.getValue().apply(info.value), widget.getKey()).bounds(width - 160, 0, 150, 20).tooltip(getTooltip(info)).build(), resetButton), name, info);
                     } else if (info.field.getType() == List.class) {
-                        if (!reload) info.index = 0;
+                        //if (!reload) info.index = 0;
                         EditBox widget = new EditBox(font, width - 160, 0, 150, 20, Component.empty());
                         widget.setMaxLength(info.width);
                         if (info.index < ((List<String>) info.value).size())
